@@ -1,11 +1,11 @@
-import cloudinaryConnect from "../config/cloudinary";
-import User from "../models/User";
+const cloudinaryConnect = require("../config/cloudinary")
+const User = require("../models/User");
 const Message = require("../models/Message");
 const {io,userSocketMap} = require("../server")
 
 
 // get all user except logged in user
-export const getUserForSidebar = async (req, res) => {
+exports.getUserForSidebar = async (req, res) => {
 	try {
 		const userId = req.user._id;
 		const filteredUsers = await User.find({ _id: { $ne: userId } }).select("-password");
@@ -37,7 +37,7 @@ export const getUserForSidebar = async (req, res) => {
 };
 
 // get all message for selected user
-export const getMessages = async (req, res) => {
+exports.getMessages = async (req, res) => {
 	try {
 		const { id: selectedUserId } = req.params;
 		const myId = req.user._id;
@@ -65,7 +65,7 @@ export const getMessages = async (req, res) => {
 };
 
 // to mark message as seen
-export const markMessageAsSeen = async (req, res) => {
+exports.markMessageAsSeen = async (req, res) => {
 	try {
 		const { id } = req.params;
 		await Message.findByIdAndUpdate(id, { seen: true });
@@ -82,7 +82,7 @@ export const markMessageAsSeen = async (req, res) => {
 
 // send message to selected User
 
-export const sendMessage = async (req,res)=>{
+exports.sendMessage = async (req,res)=>{
     try{
         const {text,image} = req.body;
         const receiverId = req.params.id;

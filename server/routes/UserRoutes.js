@@ -8,4 +8,4 @@ userRouter.post("/login",login);
 userRouter.put("/update-profile",auth,updateProfile);
 userRouter.get("/check",auth,checkAuth)
 
-export default userRouter;
+module.exports = userRouter;

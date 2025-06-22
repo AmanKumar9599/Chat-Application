@@ -1,10 +1,11 @@
 const bcrypt = require("bcryptjs");
-import cloudinaryConnect from "../config/cloudinary";
-// signup a new user
-import User from "../models/User";
-import { generateToken } from "../utils/token";
+const {generateToken} = require('../utils/token')
+const User = require("../models/User");
+const cloudinaryConnect = require('../config/cloudinary')
 
-export const signup = async (req,res)=>{
+
+// signup a new user
+exports.signup = async (req,res)=>{
     const{email,fullName,bio,password}=req.body;
     try{
         if(!fullName || !email || !password || !bio){
@@ -52,7 +53,7 @@ export const signup = async (req,res)=>{
 
 // login controller
 
-export const login = async(req,res)=>{
+exports.login = async(req,res)=>{
     try{
         const{email,password}=req.body;
         const userData = await User.findOne({email});
@@ -95,7 +96,7 @@ export const login = async(req,res)=>{
 
 // user is authenticated or not
 
-export const checkAuth = (req,res)=>{
+exports.checkAuth = (req,res)=>{
     res.status(200).json({
         success:true,
         user:req.user,
@@ -105,7 +106,7 @@ export const checkAuth = (req,res)=>{
 
 // update profile
 
-export const updateProfile = async ()=>{
+exports.updateProfile = async ()=>{
     try{
         const {fullName,bio,profilePic}=req.body;
         const userId = req.user._id;
