@@ -3,7 +3,8 @@ const app=express();
 const connectDB = require("./config/db");
 require("dotenv").config();
 const cors = require('cors');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const { default: userRouter } = require("./routes/UserRoutes");
 app.use(cookieParser())
 
 
@@ -14,6 +15,9 @@ app.use(cors());
 app.get('/', (req, res) => {
     res.send('Hello from Express!');
   });
+
+app.use("/api/auth",userRouter);
+app.use("/api/messages");
 
 const PORT =process.env.PORT||5000;
 
