@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
 import assets from '../assets/assets'
+import { useContext } from 'react';
+import { AuthContext } from '../../context/AuthContext'
+import toast from 'react-hot-toast'
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true)
@@ -9,6 +12,10 @@ const LoginPage = () => {
   const [bio, setBio] = useState('')
   const [agreeChecked, setAgreeChecked] = useState(false)
   const [formData, setFormData] = useState(null)
+
+
+  const {login} = useContext(AuthContext);
+
 
   const handleToggle = () => {
     setIsLogin(!isLogin)
@@ -21,27 +28,29 @@ const LoginPage = () => {
     setFormData(null)
   }
 
-  const onSubmitHandler = (e) => {
-    e.preventDefault()
-
-    if (isLogin && !agreeChecked) {
-      alert("⚠️ Please agree to the terms & privacy policy.")
-      return
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+  
+    if (!email || !password || (!isLogin && (!fullName || !bio))) {
+      toast.error("⚠️ Please fill all required fields.");
+      return;
     }
-
-    const data = {
-      fullName,
+    
+    if (!isLogin && !agreeChecked) {
+      toast.error("⚠️ Please agree to the terms & privacy policy.");
+      return;
+    }
+    
+  
+    const credentials = {
       email,
       password,
-      bio,
-      agreed: agreeChecked,
-      mode: isLogin ? "Login" : "Sign up"
-    }
-
-    setFormData(data)
-    console.log("✅ Submitted Form Data:", data)
-  }
-
+      ...(isLogin ? {} : { fullName, bio }),
+    };
+  
+    await login(isLogin ? "login" : "signup", credentials);
+  };
+  
   return (
     <div className='min-h-screen flex flex-col lg:flex-row lg:gap-50 gap-30 items-center justify-center bg-gradient-to-br from-black via-[#3c3a47] to-black text-white font-sans px-4'>
 
@@ -94,7 +103,7 @@ const LoginPage = () => {
               className='p-3 rounded-md bg-black/30 border border-gray-700 text-white placeholder-gray-400 outline-none'
             />
 
-            {isLogin && (
+            {!isLogin && (
               <div className='flex items-center gap-2 text-xs text-gray-400'>
                 <input
                   type='checkbox'

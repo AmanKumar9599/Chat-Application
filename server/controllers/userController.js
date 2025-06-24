@@ -24,17 +24,17 @@ exports.signup = async (req,res)=>{
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password,salt);
         const newUser = await User.create({email,fullName,password:hashedPassword,bio});
-        const options =({
-            expires: new Date(Date.now()+ 7 * 24 *60*60*1000),
-            httpOnly:true
-        });
+        // const options =({
+        //     expires: new Date(Date.now()+ 7 * 24 *60*60*1000),
+        //     httpOnly:true
+        // });
 
         const token = generateToken(newUser._id);
-        res.cookie("token",token,options).status(200).json({
-            success:true,
-            data:token,userData,
-            message:"User logged in successfully"
-        })
+        // res.cookie("token",token,options).status(200).json({
+        //     success:true,
+        //     data:token,userData,
+        //     message:"User logged in successfully"
+        // })
         return res.status(201).json({
             success:true,
             userData:newUser,token,
@@ -52,46 +52,43 @@ exports.signup = async (req,res)=>{
 
 
 // login controller
+exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const userData = await User.findOne({ email });
 
-exports.login = async(req,res)=>{
-    try{
-        const{email,password}=req.body;
-        const userData = await User.findOne({email});
-        if(!userData){
-            res.status(400).json({
-                success:false,
-                message:"Please registerd first"
-            });
-        }
-        const isPasswordCorrect = await bcrypt.compare(password,userData.password);
-        if(!isPasswordCorrect){
-            res.status(401).json({
-                success:false,
-                message:"Invalid credentials"
+        if (!userData) {
+            return res.status(400).json({
+                success: false,
+                message: "Please register first",
             });
         }
 
-        const options =({
-            expires: new Date(Date.now()+ 7 * 24 *60*60*1000),
-            httpOnly:true
-        });
+        const isPasswordCorrect = await bcrypt.compare(password, userData.password);
+
+        if (!isPasswordCorrect) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid credentials",
+            });
+        }
 
         const token = generateToken(userData._id);
-        res.cookie("token",token,options).status(200).json({
-            success:true,
-            data:token,userData,
-            message:"User logged in successfully"
-        })
 
-    }
-    catch(err){
+        return res.status(201).json({
+            success: true,
+            token,
+            userData,
+            message: "User logged in successfully",
+        });
+    } catch (err) {
         res.status(500).json({
-            success:false,
-            message: err.message
+            success: false,
+            message: err.message,
         });
     }
-     
-}
+};
+
 
 
 // user is authenticated or not
@@ -105,31 +102,42 @@ exports.checkAuth = (req,res)=>{
 }
 
 // update profile
-
-exports.updateProfile = async ()=>{
-    try{
-        const {fullName,bio,profilePic}=req.body;
+exports.updateProfile = async (req, res) => {
+    try {
+        const { fullName, bio } = req.body;
         const userId = req.user._id;
-        let updatedUser;
-        if(!profilePic){
-            updatedUser=await User.findByIdAndUpdate(userId,{bio,fullName}, {new:true});
-        }
-        else{
-            const upload =await cloudinaryConnect.uploader(profilePic);
-            updatedUser=User.findByIdAndUpdate(userId,{profilePic:upload.secure_url,fullName,bio},{new:true});
-        }
-        
-        if(!fullName){
+
+        if (!fullName) {
             return res.status(400).json({
-                success:false,
-                message:"missing credentials"
-            })
+                success: false,
+                message: "Missing fullName"
+            });
         }
-    }
-    catch(errr){
+
+        let updatedData = { fullName, bio };
+
+        if (req.files && req.files.profilePic) {
+            const file = req.files.profilePic;
+
+            const uploadResult = await cloudinaryConnect.uploader.upload(file.tempFilePath || file.tempFilePath, {
+                folder: "profilePics"
+            });
+
+            updatedData.profilePic = uploadResult.secure_url;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(userId, updatedData, { new: true });
+
+        res.status(200).json({
+            success: true,
+            user: updatedUser,
+            message: "Profile updated successfully"
+        });
+
+    } catch (err) {
         res.status(500).json({
-            success:false,
+            success: false,
             message: err.message
         });
     }
-}
+};

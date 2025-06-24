@@ -1,9 +1,17 @@
 import React from 'react'
-import assets, { userDummyData } from '../assets/assets';
-import { useNavigate } from 'react-router-dom';
+import assets, { userDummyData } from '../assets/assets'
+import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react';
 
 const Sidebar = ({ selectedUser, setSelectedUser }) => {
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  
 
   return (
     <div className={`bg-[#8185B2]/10 h-full p-1 m-2 rounded-r-xl overflow-y-scroll text-white ${selectedUser ? "max-md:hidden" : ''}`}>
@@ -11,13 +19,12 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
       {/* Top Logo and Menu */}
       <div className='flex justify-between items-center'>
         <img src={assets.logo} className='max-w-40' alt="Logo" />
-
         <div className='relative py-2 group'>
           <img src={assets.menu_icon} className='w-6 h-6 cursor-pointer' alt="Menu" />
           <div className="absolute top-full right-0 z-20 w-32 p-5 rounded-md bg-[#282142] border border-gray-600 text-gray-100 hidden group-hover:block">
             <p onClick={() => navigate('/profile')} className="cursor-pointer text-sm">Edit Profile</p>
             <hr className="my-2 border-t border-gray-500" />
-            <p className="cursor-pointer text-sm">Logout</p>
+            <p onClick={handleLogout} className="cursor-pointer text-sm">Logout</p>
           </div>
         </div>
       </div>
@@ -57,9 +64,8 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
           </div>
         ))}
       </div>
-
     </div>
   );
 }
 
-export default Sidebar;
+export default Sidebar
