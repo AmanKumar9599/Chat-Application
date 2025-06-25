@@ -17,19 +17,14 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://keen-pudding-ed8899.netlify.app"
+  "https://fabulous-sunburst-24e987.netlify.app"
 ];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true
+  origin: allowedOrigins,
+  credentials: true,
 }));
+
 
 
 // DB Connect
