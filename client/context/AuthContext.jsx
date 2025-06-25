@@ -68,16 +68,18 @@ export const AuthProvider = ({ children }) => {
     // ✅ update profile
     const updateProfile = async (body) => {
         try {
-            const { data } = await axios.put("/api/auth/update-profile", body);
-            if (data.success) {
-                setAuthUser(data.user);
-                toast.success("Profile updated successfully");
-                navigate("/"); 
-            }
+          const { data } = await axios.put("/api/auth/update-profile", body);
+          if (data.success) {
+            setAuthUser(data.user); // 🔁 update context
+            localStorage.setItem("chat-user", JSON.stringify(data.user)); // 💾 update localStorage
+            toast.success("Profile updated successfully");
+            navigate("/"); 
+          }
         } catch (err) {
-            toast.error(err.response?.data?.message || err.message);
+          toast.error(err.response?.data?.message || err.message);
         }
-    };
+      };
+      
 
     // ✅ socket connect
     const connectSocket = (userData) => {

@@ -102,42 +102,42 @@ exports.checkAuth = (req,res)=>{
 }
 
 // update profile
+const cloudinary = require('../config/cloudinary');
+
 exports.updateProfile = async (req, res) => {
-    try {
-        const { fullName, bio } = req.body;
-        const userId = req.user._id;
+  try {
+    const { fullName, bio, profilePic } = req.body;
+    const userId = req.user._id;
 
-        if (!fullName) {
-            return res.status(400).json({
-                success: false,
-                message: "Missing fullName"
-            });
-        }
-
-        let updatedData = { fullName, bio };
-
-        if (req.files && req.files.profilePic) {
-            const file = req.files.profilePic;
-
-            const uploadResult = await cloudinaryConnect.uploader.upload(file.tempFilePath || file.tempFilePath, {
-                folder: "profilePics"
-            });
-
-            updatedData.profilePic = uploadResult.secure_url;
-        }
-
-        const updatedUser = await User.findByIdAndUpdate(userId, updatedData, { new: true });
-
-        res.status(200).json({
-            success: true,
-            user: updatedUser,
-            message: "Profile updated successfully"
-        });
-
-    } catch (err) {
-        res.status(500).json({
-            success: false,
-            message: err.message
-        });
+    if (!fullName) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing fullName"
+      });
     }
+
+    let updatedData = { fullName, bio };
+
+    // 🛠️ New part: check if profilePic is base64
+    if (profilePic && profilePic.startsWith("data:image")) {
+      const uploadResult = await cloudinary.uploader.upload(profilePic, {
+        folder: "profilePics"
+      });
+      updatedData.profilePic = uploadResult.secure_url;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedData, { new: true });
+
+    res.status(200).json({
+      success: true,
+      user: updatedUser,
+      message: "Profile updated successfully"
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
 };
