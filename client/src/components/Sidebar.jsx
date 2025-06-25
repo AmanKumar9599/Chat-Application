@@ -19,7 +19,7 @@ const Sidebar = () => {
 
   useEffect(() => {
     getUsers();
-  }, [onlineUsers,authUser]);
+  }, []);
 
   const handleUserClick = (user) => {
     setSelectedUser(user);
